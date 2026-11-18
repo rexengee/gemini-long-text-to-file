@@ -34,9 +34,11 @@
     return false;
   }
 
+  // Firefox/Gecko'da metin içi yapıştırmalarda target Text düğümü dönebilir
   function isPromptEditor(target) {
-    if (!(target instanceof HTMLElement)) return false;
-    return Boolean(target.closest('rich-textarea, [contenteditable="true"], textarea'));
+    const el = target instanceof Element ? target : target?.parentElement;
+    if (!el) return false;
+    return Boolean(el.closest('rich-textarea, [contenteditable="true"], textarea'));
   }
 
   function buildTextFile(text) {
@@ -54,21 +56,17 @@
       const clipboardData = event.clipboardData;
       if (!clipboardData) return;
 
-      // Görsel veya dosya yapıştırılıyorsa müdahale etme
       if (hasClipboardFiles(clipboardData)) return;
-
-      // Sadece sohbet mesaj kutusuna yapılan yapıştırmaları yakala
       if (!isPromptEditor(event.target)) return;
 
       const text = clipboardData.getData("text/plain");
       if (!text || text.length < CHAR_THRESHOLD) return;
 
-      // Gemini DOM'una metin girmeden önce senkron olarak durdur
       event.preventDefault();
       event.stopImmediatePropagation();
 
       const textFile = buildTextFile(text);
-      window.postMessage({ type: BRIDGE_CHANNEL, file: textFile }, "*");
+      window.postMessage({ type: BRIDGE_CHANNEL, file: textFile }, window.location.origin);
 
       showToast(
         `Uzun metin (${text.length.toLocaleString("tr-TR")} karakter) .txt dosyası olarak eklendi.`
