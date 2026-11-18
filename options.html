@@ -1,1 +1,278 @@
-options.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Long Text to File</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --fg: CanvasText;
+      --divider: color-mix(in srgb, CanvasText 12%, transparent);
+      --input-bg: color-mix(in srgb, CanvasText 6%, transparent);
+      --input-border: color-mix(in srgb, CanvasText 20%, transparent);
+      --accent: #0060df;
+      --accent-dark: #00ddff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --accent: #38bdf8;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background: transparent;
+      color: var(--fg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .row-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .row-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--fg);
+    }
+
+    .row-desc {
+      font-size: 12.5px;
+      opacity: 0.72;
+      line-height: 1.45;
+    }
+
+    .row-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Üst başlıktaki anahtarla uyumlu modern toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      background: color-mix(in srgb, CanvasText 22%, transparent);
+      border: 1px solid var(--input-border);
+      transition: background 0.15s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: transform 0.15s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(16px);
+      background: #0f172a;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .switch input:checked + .slider::before {
+        background: #ffffff;
+      }
+    }
+
+    input[type="number"],
+    select {
+      padding: 5px 10px;
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 13.5px;
+    }
+
+    input[type="number"] {
+      width: 105px;
+      text-align: right;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: 2px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--fg);
+      opacity: 0.85;
+      cursor: pointer;
+    }
+
+    .preset-btn:hover {
+      opacity: 1;
+      border-color: var(--accent);
+    }
+
+    .link-btn {
+      padding: 4px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--fg);
+      cursor: pointer;
+    }
+
+    .link-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .saved-badge {
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .saved-badge.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="list">
+    <div class="row">
+      <div class="row-info">
+        <span class="row-title" data-i18n="enabledTitle"></span>
+        <span class="row-desc" data-i18n="enabledDesc"></span>
+      </div>
+      <div class="row-control">
+        <label class="switch">
+          <input type="checkbox" id="enabled" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-info">
+        <span class="row-title" data-i18n="thresholdTitle"></span>
+        <span class="row-desc" data-i18n="thresholdDesc"></span>
+        <div class="presets">
+          <button type="button" class="preset-btn" data-val="1500">1,500</button>
+          <button type="button" class="preset-btn" data-val="4000" data-default="true">4,000</button>
+          <button type="button" class="preset-btn" data-val="8000">8,000</button>
+          <button type="button" class="preset-btn" data-val="15000">15,000</button>
+        </div>
+      </div>
+      <div class="row-control">
+        <input type="number" id="charThreshold" min="100" max="500000" step="100" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-info">
+        <span class="row-title" data-i18n="toastTitle"></span>
+        <span class="row-desc" data-i18n="toastDesc"></span>
+      </div>
+      <div class="row-control">
+        <label class="switch">
+          <input type="checkbox" id="showToast" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-info">
+        <span class="row-title" data-i18n="langTitle"></span>
+        <span class="row-desc" data-i18n="langDesc"></span>
+      </div>
+      <div class="row-control">
+        <select id="language">
+          <option value="en">English</option>
+          <option value="tr">Türkçe</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-info">
+        <span class="row-title" data-i18n="resetTitle"></span>
+      </div>
+      <div class="row-control">
+        <span id="savedBadge" class="saved-badge" data-i18n="savedText"></span>
+        <button type="button" id="resetBtn" class="link-btn" data-i18n="resetBtn"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
