@@ -5,7 +5,8 @@
   const settings = {
     enabled: true,
     charThreshold: 4000,
-    showToast: true
+    showToast: true,
+    language: "en"
   };
 
   extApi.storage.local.get(settings).then((stored) => {
@@ -17,6 +18,7 @@
     if (changes.enabled) settings.enabled = Boolean(changes.enabled.newValue);
     if (changes.charThreshold) settings.charThreshold = Number(changes.charThreshold.newValue) || 4000;
     if (changes.showToast) settings.showToast = Boolean(changes.showToast.newValue);
+    if (changes.language) settings.language = changes.language.newValue === "tr" ? "tr" : "en";
   });
 
   function showToast(message) {
@@ -87,9 +89,13 @@
       const textFile = buildTextFile(text);
       window.postMessage({ type: BRIDGE_CHANNEL, file: textFile }, window.location.origin);
 
-      showToast(
-        `Uzun metin (${text.length.toLocaleString("tr-TR")} karakter) .txt dosyası olarak eklendi.`
-      );
+      const isTr = settings.language === "tr";
+      const countStr = text.length.toLocaleString(isTr ? "tr-TR" : "en-US");
+      const toastText = isTr
+        ? `Uzun metin (${countStr} karakter) .txt dosyası olarak eklendi.`
+        : `Large text (${countStr} characters) attached as a .txt file.`;
+
+      showToast(toastText);
     },
     true
   );
