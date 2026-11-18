@@ -1,8 +1,26 @@
 (() => {
+  const extApi = typeof browser !== "undefined" ? browser : chrome;
   const BRIDGE_CHANNEL = "__GEMINI_LONG_TEXT_TO_FILE__";
-  const CHAR_THRESHOLD = 4000;
+
+  const settings = {
+    enabled: true,
+    charThreshold: 4000,
+    showToast: true
+  };
+
+  extApi.storage.local.get(settings).then((stored) => {
+    Object.assign(settings, stored);
+  });
+
+  extApi.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local") return;
+    if (changes.enabled) settings.enabled = Boolean(changes.enabled.newValue);
+    if (changes.charThreshold) settings.charThreshold = Number(changes.charThreshold.newValue) || 4000;
+    if (changes.showToast) settings.showToast = Boolean(changes.showToast.newValue);
+  });
 
   function showToast(message) {
+    if (!settings.showToast) return;
     document.getElementById("gemini-text-file-toast")?.remove();
     const toast = document.createElement("div");
     toast.id = "gemini-text-file-toast";
@@ -34,7 +52,6 @@
     return false;
   }
 
-  // Firefox/Gecko'da metin içi yapıştırmalarda target Text düğümü dönebilir
   function isPromptEditor(target) {
     const el = target instanceof Element ? target : target?.parentElement;
     if (!el) return false;
@@ -53,6 +70,8 @@
   document.addEventListener(
     "paste",
     (event) => {
+      if (!settings.enabled) return;
+
       const clipboardData = event.clipboardData;
       if (!clipboardData) return;
 
@@ -60,7 +79,7 @@
       if (!isPromptEditor(event.target)) return;
 
       const text = clipboardData.getData("text/plain");
-      if (!text || text.length < CHAR_THRESHOLD) return;
+      if (!text || text.length < settings.charThreshold) return;
 
       event.preventDefault();
       event.stopImmediatePropagation();

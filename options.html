@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Long Text to File — Ayarlar</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: Canvas;
+      --fg: CanvasText;
+      --muted: GrayText;
+      --border: color-mix(in srgb, CanvasText 16%, transparent);
+      --card: color-mix(in srgb, CanvasText 4%, Canvas);
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 18px 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    .container {
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .label-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title {
+      font-weight: 600;
+    }
+
+    .desc {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    input[type="number"] {
+      width: 120px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--fg);
+      cursor: pointer;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button.primary {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 7px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+
+    button.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    button.secondary {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: transparent;
+      color: var(--fg);
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+
+    #status {
+      font-size: 13px;
+      color: #22c55e;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="row">
+        <div class="label-group">
+          <span class="title">Eklenti Aktif</span>
+          <span class="desc">Gemini'de uzun metinleri otomatik olarak .txt ekine dönüştürür.</span>
+        </div>
+        <input type="checkbox" id="enabled" />
+      </div>
+
+      <div class="row">
+        <div class="label-group">
+          <span class="title">Karakter Sınırı</span>
+          <span class="desc">Bu değer ve üzerindeki yapıştırmalar .txt dosyasına çevrilir.</span>
+        </div>
+        <input type="number" id="charThreshold" min="100" max="500000" step="100" />
+      </div>
+
+      <div class="presets">
+        <button type="button" class="preset-btn" data-val="1500">1.500</button>
+        <button type="button" class="preset-btn" data-val="4000">4.000 (Varsayılan)</button>
+        <button type="button" class="preset-btn" data-val="8000">8.000</button>
+        <button type="button" class="preset-btn" data-val="15000">15.000</button>
+      </div>
+
+      <div class="row">
+        <div class="label-group">
+          <span class="title">Bildirim Göster</span>
+          <span class="desc">Dosyaya dönüştürüldüğünde sağ alt köşede kısa bilgi gösterir.</span>
+        </div>
+        <input type="checkbox" id="showToast" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="saveBtn" class="primary">Kaydet</button>
+      <button type="button" id="resetBtn" class="secondary">Varsayılana Sıfırla</button>
+      <span id="status"></span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
